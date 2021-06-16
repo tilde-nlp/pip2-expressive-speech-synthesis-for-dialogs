@@ -1,0 +1,67 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Expressive speech synthesis for dialogs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="shortcut icon">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</head>
+<body>
+<div class="content">
+    <h1>Expressive Speech Synthesis for Dialogs</h1>
+
+    <h3>Synth text</h3>
+
+    <form class="synth-form">
+        <textarea id="synth-textarea" placeholder="Enter text"></textarea>
+
+        <div class="button-container">
+            <button id="synth-button" type="button" class="btn btn-primary"><i class="fas fa-comment" style="margin-right: 0.5em"></i> Synthesize</button>
+            <button id="copy-button" type="button" class="btn btn-primary"><i class="fas fa-copy" style="margin-right: 0.5em"></i> Copy GST weights</button>
+        </div>
+    </form>
+
+    <div class="style-container">
+        <div class="gst-token-container">
+            <h4>Adjust the style token weights</h4>
+            <div>
+                {% for token in gst_tokens %}
+                    <div class="token-bar-container">
+                        <label for="{{ token }}">Token {{ token }}</label>
+                        <input class="form-range token-slider" type="range" min="-10" max="10" value="0.0"
+                               oninput="this.nextElementSibling.value = (this.value / 10).toFixed(1)">
+                        <output>0.0</output>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="or">
+            <h4>or</h4>
+        </div>
+        <div class="style-reference-container">
+            <h4>Upload style reference</h4>
+            <div class="style-reference-file-container">
+                <div id="style-reference-playback-container" style="display: none">
+                    <button id="file-close-button" class="btn"><i class="fas fa-times"></i></button>
+                    <button id="file-play-button" class="btn"><i class="fas fa-play"></i></button>
+                    <span id="style-reference-filename"></span>
+                </div>
+
+                <input id="style-reference-input" type="file" name="filename" style="display: none">
+                <button id="style-reference-button" class="browse btn btn-primary" type="button">
+                    <i class="fas fa-file-audio" style="margin-right: 0.5em"></i> Browse
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+</div>
+</body>
+</html>

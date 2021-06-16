@@ -1,0 +1,6 @@
+tacotron2_gst_path: "/path/to/tacotron2_gst"
+waveglow_path: "/path/to/waveglow"
+model_checkpoint_path: "/path/to/tacotron2_gst_checkpoint"
+model_config_path: "/path/to/hparams.yaml"
+vocoder_checkpoint_path: "/path/to/waveglow_checkpoint"
+synth_device: "cuda"
