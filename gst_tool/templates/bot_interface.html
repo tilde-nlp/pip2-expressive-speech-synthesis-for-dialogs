@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script
+            crossorigin="anonymous"
+            src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"
+    ></script>
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="shortcut icon">
+    <script crossorigin="anonymous" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        #webchat {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="webchat" role="main"></div>
+<script>
+    const synthAudio = document.createElement("audio");
+
+    const store = window.WebChat.createStore({}, ({dispatch}) => next => action => {
+        if (action.type === 'DIRECT_LINE/INCOMING_ACTIVITY') {
+            if (action.payload.activity.type == "message" && action.payload.activity.from.role == "bot") {
+                let text = action.payload.activity.text;
+                let pos = text.indexOf("}") + 1;
+                let gst_weights = [0, 0, 0, 0, 0, 0, 0, 0];
+                if (pos > 0) {
+                    let weights = JSON.parse(text.substr(0, pos).replace("​", ""));
+                    for (let token in weights) {
+                        gst_weights[parseInt(token)] = weights[token];
+                    }
+                    text = text.substr(pos)
+                    action.payload.activity.text = text;
+                }
+
+                let body = {
+                    text,
+                    gst_weights
+                }
+
+                let req = $.ajax({
+                    type: "POST",
+                    url: "/synthesize",
+                    data: JSON.stringify(body),
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8"
+                });
+
+                req.done((res) => {
+                    synthAudio.setAttribute( "src", "data:audio/wav;base64," + res.audio);
+                    synthAudio.controls = true
+                    synthAudio.play();
+                });
+            }
+        }
+        return next(action);
+    });
+
+
+    window.WebChat.renderWebChat(
+        {
+            directLine: window.WebChat.createDirectLine({
+                token: '4bdpgJSHsxg.CoVFYlkr-B4IwbD45FpuxVnF470UlpQUTl08Za3cLco'
+            }),
+            store,
+            userID: 'YOUR_USER_ID',
+            username: 'Web Chat User',
+            locale: 'en-US'
+        },
+        document.getElementById('webchat')
+    );
+</script>
+</body>
+</html>

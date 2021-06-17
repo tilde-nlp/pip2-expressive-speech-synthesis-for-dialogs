@@ -20,6 +20,7 @@ def synthesize(request):
     text = body.get("text", None)
     gst_tokens = body.get("gst_tokens", None)
     reference_style = body.get("reference_style", None)
+    speaker_id = body.get("speaker_id", 0)
 
     if text is None:
         return json({})
@@ -38,8 +39,6 @@ def synthesize(request):
             "1": -0.15,
             "5": 0.15
         }
-
-    speaker_id = 0
 
     pcm = tts_engine.speak_with_style(text, gst_style, speaker_id)
     buf = BytesIO()

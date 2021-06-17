@@ -11,14 +11,19 @@ URL = "http://localhost:8001/synthesize"
 app = Flask(__name__)
 
 
-@app.route("/")
-def index():
+@app.route("/gst_tool")
+def gst_tool():
     gst_tokens = {}
 
     for i in range(8):
         gst_tokens[f"{i}"] = 0.0
 
-    return render_template("index.html", gst_tokens=gst_tokens)
+    return render_template("gst_tool.html", gst_tokens=gst_tokens)
+
+
+@app.route("/bot_interface")
+def bot_interface():
+    return render_template("bot_interface.html")
 
 
 @app.route("/synthesize", methods=["POST"])
