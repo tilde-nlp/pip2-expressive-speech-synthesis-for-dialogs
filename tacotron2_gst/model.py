@@ -38,7 +38,7 @@ class Attention(nn.Module):
         super(Attention, self).__init__()
         self.query_layer = LinearNorm(attention_rnn_dim, attention_dim,
                                       bias=False, w_init_gain='tanh')
-        self.memory_layer = LinearNorm(embedding_dim, attention_dim, bias=False,
+        self.inputs_layer = LinearNorm(embedding_dim, attention_dim, bias=False,
                                        w_init_gain='tanh')
         self.v = LinearNorm(attention_dim, 1, bias=False)
         self.location_layer = LocationLayer(attention_location_n_filters,
@@ -53,7 +53,7 @@ class Attention(nn.Module):
         self.attention_weights_cum = inputs.data.new(B, T).zero_()
 
     def preprocess_inputs(self, inputs: torch.Tensor):
-        return self.memory_layer(inputs)
+        return self.inputs_layer(inputs)
 
     def get_alignment_energies(self, query: torch.Tensor, processed_memory: torch.Tensor) -> torch.Tensor:
         """
