@@ -1,16 +1,21 @@
+import os
 import sys
+import json
+import uuid
 import base64
 import logging
 import argparse
 from io import BytesIO
 
 import yaml
-from sanic import Sanic
+from sanic import Sanic, response
 from scipy.io.wavfile import write
-from sanic.response import json, raw
 
 
 app = Sanic("PIP2 Expressive TTS Server")
+
+
+REF_DIR = "data"
 
 
 @app.route('/synthesize', methods=["POST"])
@@ -20,32 +25,72 @@ def synthesize(request):
     text = body.get("text", None)
     gst_tokens = body.get("gst_tokens", None)
     reference_style = body.get("reference_style", None)
-    speaker_id = body.get("speaker_id", 0)
+    reference_name = body.get("reference_name", None)
+    speaker_id = body.get("speaker_id", 1)
 
     if text is None:
-        return json({})
+        return response.json({}, status=400)
 
     if gst_tokens is not None:
-        gst_style = {}
-        for i in range(len(gst_tokens)):
-            gst_style[i] = gst_tokens[i]
+        gst_style = gst_tokens
     elif reference_style is not None:
         audio_base64 = reference_style.split("base64,")[-1]
         audio = base64.b64decode(audio_base64)
         gst_style = BytesIO(audio)
+    elif reference_name is not None:
+        if os.path.isfile(os.path.join(REF_DIR, "mapping.json")):
+            with open(os.path.join(REF_DIR, "mapping.json"), "r", encoding="utf-8") as f:
+                mapping = json.load(f)
+                if reference_name not in mapping:
+                    return response.json({"error", "Unknown reference name"}, status=400)
+
+                gst_style = mapping[reference_name]
+        else:
+            return response.json({"error", "No reference audio saved"}, status=400)
     else:
-        gst_style = {
-            "0": 0.15,
-            "1": -0.15,
-            "5": 0.15
-        }
+        gst_style = None
 
     pcm = tts_engine.speak_with_style(text, gst_style, speaker_id)
     buf = BytesIO()
     write(buf, tts_engine.get_sample_rate(), pcm)
     buf.seek(0)
 
-    return raw(buf.read(), content_type="audio/wav")
+    return response.raw(buf.read(), content_type="audio/wav")
+
+
+@app.route("/upload", methods=["POST"])
+def upload(request):
+    body = request.json
+
+    reference_style = body.get("reference_style", None)
+    reference_name = body.get("reference_name", None)
+    if reference_style is None or reference_name is None:
+        return response.json({}, status=400)
+
+    audio_base64 = reference_style.split("base64,")[-1]
+    audio = base64.b64decode(audio_base64)
+
+    # save audio
+    ref_id = str(uuid.uuid4())
+    ref_path = os.path.join(REF_DIR, f"{ref_id}.wav")
+    with open(ref_path, "wb") as f:
+        f.write(audio)
+
+    # save mapping from ref name to audio
+    if os.path.isfile(os.path.join(REF_DIR, "mapping.json")):
+        with open(os.path.join(REF_DIR, "mapping.json"), "r", encoding="utf-8") as f:
+            mapping = json.load(f)
+    else:
+        mapping = {}
+
+    mapping[reference_name] = ref_path
+
+    with open(os.path.join(REF_DIR, "mapping.json"), "w", encoding="utf-8") as f:
+        json.dump(mapping, f)
+
+    return response.json({
+        "id": ref_id
+    })
 
 
 def create_tts_engine(config_path: str):

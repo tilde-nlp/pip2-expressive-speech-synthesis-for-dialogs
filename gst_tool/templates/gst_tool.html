@@ -23,14 +23,14 @@
 
         <div class="button-container">
             <button id="synth-button" type="button" class="btn btn-primary"><i class="fas fa-comment" style="margin-right: 0.5em"></i> Synthesize</button>
-            <button id="copy-button" type="button" class="btn btn-primary"><i class="fas fa-copy" style="margin-right: 0.5em"></i> Copy GST weights</button>
+            <button id="download-button" type="button" class="btn btn-primary"><i class="fas fa-download" style="margin-right: 0.5em"></i> Download</button>
         </div>
     </form>
 
     <div class="style-container">
         <div class="gst-token-container">
             <h4>Adjust the style token weights</h4>
-            <div>
+            <div class="token-container">
                 {% for token in gst_tokens %}
                     <div class="token-bar-container">
                         <label for="{{ token }}">Token {{ token }}</label>
@@ -40,6 +40,7 @@
                     </div>
                 {% endfor %}
             </div>
+            <button id="copy-button" type="button" class="btn btn-primary"><i class="fas fa-copy" style="margin-right: 0.5em"></i> Copy GST weights</button>
         </div>
         <div class="or">
             <h4>or</h4>
@@ -47,16 +48,33 @@
         <div class="style-reference-container">
             <h4>Upload style reference</h4>
             <div class="style-reference-file-container">
-                <div id="style-reference-playback-container" style="display: none">
-                    <button id="file-close-button" class="btn"><i class="fas fa-times"></i></button>
-                    <button id="file-play-button" class="btn"><i class="fas fa-play"></i></button>
-                    <span id="style-reference-filename"></span>
+                <div id="reference-select-form">
+                    <input id="style-reference-input" type="file" name="filename" style="display: none">
+                    <button id="style-reference-button" class="browse btn btn-primary" type="button">
+                        <i class="fas fa-file-audio" style="margin-right: 0.5em"></i> Browse
+                    </button>
                 </div>
 
-                <input id="style-reference-input" type="file" name="filename" style="display: none">
-                <button id="style-reference-button" class="browse btn btn-primary" type="button">
-                    <i class="fas fa-file-audio" style="margin-right: 0.5em"></i> Browse
-                </button>
+                <div id="reference-interaction-form" style="display: none">
+                    <div id="style-reference-playback-container" class="flex-cell">
+                        <button id="file-close-button" class="btn"><i class="fas fa-times"></i></button>
+                        <button id="file-play-button" class="btn"><i class="fas fa-play"></i></button>
+                        <span id="style-reference-filename"></span>
+                    </div>
+
+                    <div>
+                        <label for="reference-name">Reference name</label>
+                        <input type="text" class="form-control" id="reference-name" aria-describedby="refHelp" placeholder="Happy">
+                        <small id="refHelp" class="form-text text-muted">Assign a name for the reference and add it to the bot response, e.g., {"ref_name": "Happy"}</small>
+                    </div>
+
+                    <div class="flex-cell" style="justify-content: flex-end">
+                        <div id="file-id-container" style="display: none"></div>
+                        <button id="style-reference-upload" class="browse btn btn-primary" type="button">
+                            <i class="fas fa-upload" style="margin-right: 0.5em"></i> Upload
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

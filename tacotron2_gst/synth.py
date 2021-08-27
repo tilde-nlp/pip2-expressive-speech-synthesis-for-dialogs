@@ -86,10 +86,12 @@ def synthesize_sequence(text,
         # style_wav == dictionary using the style tokens {'token1': 'value', 'token2': 'value'}
         # example {"0": 0.15, "1": 0.15, "5": -0.15}
         style_mel = style_wav
-    else:
+    elif style_wav is not None:
         # style_wav == audio reference
         audio, sampling_rate = load_wav_to_torch(style_wav)
         style_mel = compute_style_mel(audio, sampling_rate, hparams, device)
+    else:
+        style_mel = None
 
     with torch.no_grad():
         mel_outputs, mel_outputs_postnet, _, alignments = model.inference(

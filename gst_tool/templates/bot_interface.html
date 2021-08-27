@@ -32,20 +32,25 @@
         if (action.type === 'DIRECT_LINE/INCOMING_ACTIVITY') {
             if (action.payload.activity.type == "message" && action.payload.activity.from.role == "bot") {
                 let text = action.payload.activity.text;
-                let pos = text.indexOf("}") + 1;
-                let gst_weights = [0, 0, 0, 0, 0, 0, 0, 0];
-                if (pos > 0) {
-                    let weights = JSON.parse(text.substr(0, pos).replace("​", ""));
-                    for (let token in weights) {
-                        gst_weights[parseInt(token)] = weights[token];
-                    }
-                    text = text.substr(pos)
-                    action.payload.activity.text = text;
+                let body = {
+                    text
                 }
 
-                let body = {
-                    text,
-                    gst_weights
+                // Check if additional payload has been added to the text in JSON format
+                let pos = text.indexOf("}") + 1;
+                if (pos > 0) {
+                    let json = JSON.parse(text.substr(0, pos).replace("​", ""));
+                    if ("ref" in json) {
+                        // json contains reference name
+                        body.reference_name = json.ref;
+                    } else {
+                        body.gst_tokens = json
+                    }
+
+                    // filter out json payload form the text
+                    text = text.substr(pos)
+                    body.text = text;
+                    action.payload.activity.text = text;
                 }
 
                 let req = $.ajax({
